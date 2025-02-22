@@ -1,110 +1,61 @@
 // AudioProcessor.jsx
-import { useState, useRef } from "react";
+import React, { useState } from 'react';
 
-const useAudioProcessor = () => {
+const AudioProcessor = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-
+  const [audioUrl, setAudioUrl] = useState("");  // State for audio URL
+  const [isPlaying, setIsPlaying] = useState(false);  // State for tracking if audio is playing
   const fetchData = async () => {
     if (!youtubeLink) return;
 
-    {/*
-        const mockData = {
-            times: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
-            dynamics: [0.15, 0.25, 0.78, 0.92, 0.85, 0.67, 0.55]
-        };
-        setData(mockData);
-        */}
-
     try {
-      const response = await fetch("http://localhost:5000/process_youtube", {
+      const response = await fetch("http://127.0.0.1:5000/process_youtube", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ youtube_url: youtubeLink }),
+        body: JSON.stringify({ youtube_url: youtubeLink }) // Correct key name
       });
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "An unknown error occurred");
+      if (!response.ok) {
+        throw new Error("Failed to fetch waveform data");
+      }
 
-      setData(result);
-      setError("");
+      const result = await response.json();
+      setData(result);  // Set waveform data
+      setAudioUrl(result.audio_file_url);  // Set audio URL for playback
+
+      // Debugging: Check if the audio URL is being set correctly
+      console.log("Audio URL:", result.audio_file_url);
     } catch (error) {
-      setError(error.message);
-      setData(null);
+      console.error("Error fetching waveform data:", error);
     }
   };
 
-  const processData = (dataset) => {
-    if (!dataset) return [];
-    return dataset.times.map((time, index) => ({
+  const processData = () => {
+    if (!data || !data.waveform_data || !data.waveform_data.times || !data.waveform_data.dynamics) return [];
+    
+    return data.waveform_data.times.map((time, index) => ({
       time,
-      dynamics: dataset.dynamics[index],
+      dynamics: data.waveform_data.dynamics[index]
     }));
   };
 
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorderRef.current = new MediaRecorder(stream);
-
-    mediaRecorderRef.current.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunksRef.current.push(event.data);
-      }
-    };
-
-    mediaRecorderRef.current.onstop = async () => {
-      setIsLoading(true);
-      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/mp3" });
-      const formData = new FormData();
-      formData.append("file", audioBlob, "recording.mp3");
-
-      try {
-        const response = await fetch("http://localhost:5000/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-        setUserData(result);
-      } catch (error) {
-        console.error("Upload Error:", error);
-      } finally {
-        setIsLoading(false);
-        setAudioURL(URL.createObjectURL(audioBlob));
-      }
-    };
-
-    mediaRecorderRef.current.start();
-    setIsRecording(true);
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+  const toggleAudio = () => {
+    const audio = document.getElementById('audioPlayer');
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
     }
+    setIsPlaying(!isPlaying);
   };
 
-  return {
-    youtubeLink,
-    setYoutubeLink,
-    fetchData,
-    processData,
-    data,
-    error,
-    isRecording,
-    startRecording,
-    stopRecording,
-    isLoading,
-    userData,
+  const handleAudioEnd = () => {
+    setIsPlaying(false);  // Reset to play state after audio ends
   };
+
+  return { youtubeLink, setYoutubeLink, fetchData, processData, data, audioUrl, toggleAudio, isPlaying, handleAudioEnd };
 };
 
-export default useAudioProcessor;
+export default AudioProcessor;
