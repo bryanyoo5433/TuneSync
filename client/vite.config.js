@@ -6,4 +6,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react(), 
     tailwindcss(),],
+    theme: {
+      extend: {
+        fontFamily: {
+          garamond: ['EB Garamond', 'serif'],
+          inter: ['Inter', 'sans-serif'],
+        },
+      },
+    },
 })
