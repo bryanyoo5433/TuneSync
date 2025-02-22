@@ -46,7 +46,5 @@ def generate_waveform(audio_file):
         "dynamics": smoothed_loudness.tolist()
     }
 
-    print(response_data["times"][:10])
-    print(response_data["dynamics"][:10])
     return response_data
 

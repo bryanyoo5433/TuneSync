@@ -5,3 +5,5 @@ scipy
 Werkzeug
 flask-cors
 numpy
+sounddevice
+yt_dlp
