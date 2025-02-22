@@ -80,7 +80,24 @@ const Home = () => {
           <Record />
         )}
       </main>
-    </div>
+
+      {/* Play Audio Button (Only appears after the audio URL is received) */}
+      {data && (
+        <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
+          <button
+            onClick={toggleAudio}
+            className="play-button w-48 h-24 outline-black"
+          >
+            <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+          </button>
+          <audio
+            id="audioPlayer"
+            src={audioUrl}
+            onEnded={handleAudioEnd} // Reset state after audio ends
+          />
+        </div>
+      )}
+    </div >
   );
 };
 

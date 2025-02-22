@@ -7,7 +7,6 @@ const AudioProcessor = () => {
   const [error, setError] = useState("");
   const [audioUrl, setAudioUrl] = useState("");  // State for audio URL
   const [isPlaying, setIsPlaying] = useState(false);  // State for tracking if audio is playing
-
   const fetchData = async () => {
     if (!youtubeLink) return;
 
