@@ -1,3 +1,15 @@
+"""
+Module Name: waveform.py
+Author: Christina Lee
+Date: 2025-02-21
+Description:
+    This function converts a mp3 file into waveform.
+    
+Usage:
+    Adjust sigma to adjust graph smoothness accordingly.
+
+"""
+
 import numpy as np
 import librosa
 import librosa.display
@@ -24,7 +36,7 @@ def generate_waveform(audio_file):
     normalized_loudness = (rms - rms_min) / (rms_max - rms_min)
 
     # Step 3: Smooth the curve using a Gaussian filter (adjust sigma for smoothness)
-    smoothed_loudness = gaussian_filter1d(normalized_loudness, sigma=5)
+    smoothed_loudness = gaussian_filter1d(normalized_loudness, sigma=5) # adjust sigma here
 
     # Step 4: Time axis (convert frames to seconds)
     times = librosa.times_like(rms, sr=sr, hop_length=hop_length)

@@ -1,3 +1,15 @@
+"""
+Module Name: record.py
+Author: Christina Lee
+Date: 2025-02-21
+Description:
+    This function records the audio from user's computer.
+    
+Usage:
+    Adjust output_file and duration accordingly.
+
+"""
+
 import sounddevice as sd
 import numpy as np
 import wave
@@ -19,4 +31,6 @@ def record_audio(output_file, duration=5, sample_rate=44100):
         wf.writeframes(audio.tobytes())
 
 # Example usage
-record_audio("user_recording.wav", duration=5)
+output_file = "user_recording.wav"
+duration = 5
+record_audio(output_file, duration)
