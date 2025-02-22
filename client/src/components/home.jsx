@@ -7,6 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const audioProcessing = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   const fetchData = async () => {
     if (!youtubeLink) return;
