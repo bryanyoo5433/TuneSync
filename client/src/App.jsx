@@ -1,17 +1,16 @@
-import { useState } from 'react'
+import react, { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
-
   const [youtubeLink, setYoutubeLink] = useState("");
-  const [soundwaves, setSoundwaves] = useState(null);
+  const [data, setData] = useState(null);
 
+  /*const [soundwaves, setSoundwaves] = useState(null);
   const handleUpload = async () => {
     if (!youtubeLink) return;
-
     try {
       const response = await fetch("/api/convert", {
         method: "POST",
@@ -26,11 +25,29 @@ function App() {
     } catch (error) {
       console.error(error);
     }
+  };*/
+
+  const fetchData = async () => {
+    if (!youtubeLink) return;
+
+    try {
+      const response = await fetch("http://localhost:5173/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ youtubeLink })
+      });
+
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
+
 
   return (
     <>
-      <div>
+      {/*<div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -38,8 +55,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      {/*<h1>Vite + React</h1>*/}
-
+      <h1>Vite + React</h1>*/}
       <div className='youtube-upload'>
         <h1>Convert Audio</h1>
         <input
@@ -50,24 +66,24 @@ function App() {
           placeholder="Enter YouTube link"
         />
         <button
-          onClick={handleUpload}
+          onClick={fetchData}
           className="mt-4 w-full py-2 px-4 bg-gray-600 hover:bg-gray-500 text-gray-200 rounded-lg"
         >
           Upload
         </button>
+        {data && (
+          <div className="mt-4">
+            <h2 className="text-lg font-bold">Processed Dynamics Data</h2>
+            <pre className="bg-gray-200 p-4 rounded">{JSON.stringify(data, null, 2)}</pre>
+          </div>
+        )}
       </div>
 
-      <div className="card">
+      {/*<div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      </div>*/}
     </>
   )
 }
