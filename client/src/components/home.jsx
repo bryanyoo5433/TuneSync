@@ -3,7 +3,6 @@ import Record from './record';
 import '../App.css'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-
 const audioProcessing = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [data, setData] = useState(null);
@@ -35,19 +34,24 @@ const audioProcessing = () => {
       }
 
       const result = await response.json();
-      setData(result); //  Store real backend waveform data instead of mock data
+      setData(result);  // Set waveform data
+      setAudioUrl(result.audio_file_url);  // Set audio URL for playback
+
+      // Debugging: Check if the audio URL is being set correctly
+      console.log("Audio URL:", result.audio_file_url);
     } catch (error) {
       console.error(error);
       setData(null);
     }
   };
 
+  // Updated processData to match the new response format
   const processData = () => {
-    if (!data || !data.times || !data.dynamics) return [];
+    if (!data || !data.waveform_data || !data.waveform_data.times || !data.waveform_data.dynamics) return [];
 
-    return data.times.map((time, index) => ({
+    return data.waveform_data.times.map((time, index) => ({
       time,
-      dynamics: data.dynamics[index]
+      dynamics: data.waveform_data.dynamics[index]
     }));
   };
 
@@ -94,6 +98,22 @@ const audioProcessing = () => {
     }
   };
 
+  // Toggle play/pause functionality for audio
+  const toggleAudio = () => {
+    const audio = document.getElementById('audioPlayer');
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  // Reset audio to "Play Audio" once the audio ends
+  const handleAudioEnd = () => {
+    setIsPlaying(false);  // Reset to play state after audio ends
+  };
+
   return { youtubeLink, setYoutubeLink, fetchData, processData, data, error, isRecording, startRecording, stopRecording, isLoading, audioURL };
 };
 
@@ -108,54 +128,79 @@ const Home = () => {
       </header>
 
       {/* YouTube Input */}
-        <h1 className="text-3xl font-bold mb-6">Convert Audio</h1>
-        <input
-          type="text"
-          value={youtubeLink}
-          onChange={(e) => setYoutubeLink(e.target.value)}
-          className="link-box text-center"
-          placeholder="Enter YouTube link"
-        />
-        <button onClick={fetchData} className="upload-button">
-          Upload
-        </button>
+      <h1 className="text-3xl font-bold mb-6">Convert Audio</h1>
+      <input
+        type="text"
+        value={youtubeLink}
+        onChange={(e) => setYoutubeLink(e.target.value)}
+        className="link-box text-center"
+        placeholder="Enter YouTube link"
+      />
+      <button onClick={fetchData} className="upload-button">
+        Upload
+      </button>
 
-        {/* WaveForm Graph */}
-        <main className=''>
-          <div>
+      {/* WaveForm Graph */}
+      <main className=''>
+        <div>
 
-            {error && <p className='text-red-500 text-center mt-2'>{error}</p>}
+          {error && <p className='text-red-500 text-center mt-2'>{error}</p>}
 
-            {data && (
-              <>
-                <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
-                  <h2 className="text-2xl font-bold mb-4 text-center">Dynamics Over Time</h2>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={processData()}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
-                      <XAxis
-                        dataKey="time"
-                        tick={{ fill: "#4b5563" }}
-                        label={{ value: "Time (s)", position: "insideBottom", fill: "#4b5563" }}
-                      />
-                      <YAxis
-                        tick={{ fill: "#4b5563" }}
-                        label={{ value: "Loudness", angle: -90, position: "insideLeft", fill: "#4b5563" }}
-                      />
-                      <Tooltip wrapperStyle={{ color: "black" }} />
-                      <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <button className='record-button' onClick={isRecording ? stopRecording : startRecording}>
-                  {isRecording ? 'Stop Recording' : 'Record My Own'}
-                </button>
-                {isLoading && <p className='text-center text-gray-600'>Processing audio...</p>}
-              </>
-            )}
-          </div>
-        </main>
-    </div>
+          {data && (
+            <>
+              <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
+                <h2 className="text-2xl font-bold mb-4 text-center">Dynamics Over Time</h2>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={processData(data)} margin={{ bottom: 30 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+                    <XAxis dataKey="time" tick={{ fill: "#4b5563" }}
+                      label={{
+                        value: "Time (s)",
+                        position: "insideBottom",
+                        offset: -15,
+                        fill: "#4b5563"
+                      }}
+                    />
+                    <YAxis tick={{ fill: "#4b5563" }}
+                      label={{
+                        value: "Loudness",
+                        angle: -90,
+                        position: "insideLeft",
+                        fill: "#4b5563"
+                      }}
+                    />
+                    <Tooltip wrapperStyle={{ color: "black" }} />
+                    <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <button className='record-button' onClick={isRecording ? stopRecording : startRecording}>
+                {isRecording ? 'Stop Recording' : 'Record My Own'}
+              </button>
+              {isLoading && <p className='text-center text-gray-600'>Processing audio...</p>}
+            </>
+          )}
+        </div>
+      </main>
+
+
+      {/* Play Audio Button (Only appears after the audio URL is received) */}
+      {data && (
+        <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
+          <button
+            onClick={toggleAudio}
+            className="play-button w-48 h-24 outline-black"
+          >
+            <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+          </button>
+          <audio
+            id="audioPlayer"
+            src={audioUrl}
+            onEnded={handleAudioEnd} // Reset state after audio ends
+          />
+        </div>
+      )}
+    </div >
   );
 };
 
