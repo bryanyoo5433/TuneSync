@@ -1,3 +1,15 @@
+"""
+Module Name: youtube_to_mp3.py
+Author: Christina Lee
+Date: 2025-02-22
+Description:
+    This function converts a youtube video link into an mp3 file.
+    
+Usage:
+    Change youtube_link and output_file accordingly.
+
+"""
+
 import yt_dlp
 import os
 import imageio_ffmpeg as ffmpeg  # Uses Python-installed FFmpeg
@@ -34,4 +46,6 @@ def download_youtube_audio(youtube_url, output_mp3="output.mp3"):
     return None
 
 # Example usage
-download_youtube_audio("https://www.youtube.com/watch?v=-RxqaEs-DvY", "my_audio.mp3")
+youtube_link = "https://www.youtube.com/watch?v=-RxqaEs-DvY"
+output_file = "my_audio.mp3"
+download_youtube_audio(youtube_link, output_file)
