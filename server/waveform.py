@@ -29,21 +29,26 @@ def generate_waveform(audio_file):
     # Step 4: Time axis (convert frames to seconds)
     times = librosa.times_like(rms, sr=sr, hop_length=hop_length)
 
-    # Step 5: Generate the plot and return as base64 image
-    plt.figure(figsize=(10, 4))
-    plt.plot(times, smoothed_loudness, label="Dynamics (p → f)", color="blue")
-    plt.xlabel("Time (seconds)")
-    plt.ylabel("Normalized Dynamics (p to f)")
-    plt.title("Musical Phrasing Dynamics")
-    plt.ylim(0, 1)  # Keep the range between p (soft) and f (loud)
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # plot for debugging
+    # plt.figure(figsize=(10, 4))
+    # plt.plot(times, smoothed_loudness, label="Dynamics (p → f)", color="blue")
+    # plt.xlabel("Time (seconds)")
+    # plt.ylabel("Normalized Dynamics (p to f)")
+    # plt.title("Musical Phrasing Dynamics")
+    # plt.ylim(0, 1)  # Keep the range between p (soft) and f (loud)
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
 
-    # Save plot to a bytes buffer and convert to base64 to return as image
-    img_buf = io.BytesIO()
-    plt.savefig(img_buf, format='png')
-    img_buf.seek(0)
-    img_base64 = base64.b64encode(img_buf.read()).decode('utf-8')
 
-    return smoothed_loudness.tolist(), img_base64
+    response_data = {
+        "times": times.tolist(),
+        "dynamics": smoothed_loudness.tolist()
+    }
+
+    print(response_data["times"][:10])
+    print(response_data["dynamics"][:10])
+    return response_data
+
+
+generate_waveform('./viola-crescendo-66285.mp3')
