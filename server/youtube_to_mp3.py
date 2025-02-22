@@ -3,16 +3,17 @@ Module Name: youtube_to_mp3.py
 Author: Christina Lee
 Date: 2025-02-21
 Description:
-    This function converts a youtube video link into an mp3 file.
+    Function download_youtube_audio converts a youtube video link into an mp3 file.
+    Function crop_audio crops the mp3 file given start and end time.
     
 Usage:
-    Change youtube_link and output_file accordingly.
-
+    Change youtube_link, mp3_file, cropped_file, start_time, and end_time accordingly.
 """
 
 import yt_dlp
 import os
 import imageio_ffmpeg as ffmpeg  # Uses Python-installed FFmpeg
+from pydub import AudioSegment
 
 # Get the FFmpeg path from imageio_ffmpeg
 FFMPEG_PATH = ffmpeg.get_ffmpeg_exe()  # Correct function name
@@ -45,7 +46,37 @@ def download_youtube_audio(youtube_url, output_mp3="output.mp3"):
     print("❌ Error: No MP3 file found after download.")
     return None
 
+def crop_audio(input_file, output_file, start_time, end_time):
+    """
+    Crops an MP3 file from start_time to end_time.
+    
+    :param input_file: Path to the MP3 file
+    :param output_file: Path to save the cropped file
+    :param start_time: Start time in seconds
+    :param end_time: End time in seconds
+    """
+    # Load the MP3 file
+    audio = AudioSegment.from_mp3(input_file)
+    
+    # Convert seconds to milliseconds
+    start_ms = start_time * 1000
+    end_ms = end_time * 1000
+    
+    # Crop the audio
+    cropped_audio = audio[start_ms:end_ms]
+    
+    # Export the cropped version
+    cropped_audio.export(output_file, format="mp3")
+    print(f"✅ Cropped audio saved as {output_file}")
+
 # Example usage
 youtube_link = "https://www.youtube.com/watch?v=-RxqaEs-DvY"
-output_file = "my_audio.mp3"
+mp3_file = "my_audio.mp3"
 download_youtube_audio(youtube_link, output_file)
+
+
+# Example usage
+cropped_file = "cropped_audio.mp3"
+start_time = 10
+end_time = 30
+crop_audio(mp3_file, cropped_file, start_time, end_time)
