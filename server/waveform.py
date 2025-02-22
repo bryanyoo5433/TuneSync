@@ -50,5 +50,3 @@ def generate_waveform(audio_file):
     print(response_data["dynamics"][:10])
     return response_data
 
-
-generate_waveform('./viola-crescendo-66285.mp3')
