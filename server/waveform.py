@@ -24,7 +24,7 @@ def generate_waveform(audio_file):
     normalized_loudness = (rms - rms_min) / (rms_max - rms_min)
 
     # Step 3: Smooth the curve using a Gaussian filter (adjust sigma for smoothness)
-    smoothed_loudness = gaussian_filter1d(normalized_loudness, sigma=100)
+    smoothed_loudness = gaussian_filter1d(normalized_loudness, sigma=5)
 
     # Step 4: Time axis (convert frames to seconds)
     times = librosa.times_like(rms, sr=sr, hop_length=hop_length)
