@@ -11,6 +11,8 @@ CORS(app)
 app.config['AUDIO_FOLDER'] = 'audio_files'
 os.makedirs(app.config['AUDIO_FOLDER'], exist_ok=True)
 
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -27,9 +29,12 @@ def upload_file():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(file_path)
 
+    # Generate waveform data
     waveform_data = generate_waveform(file_path)
 
-    return jsonify(waveform_data), 200
+    audio_file_url = f"http://127.0.0.1:5000/uploads/{filename}"
+
+    return jsonify({"waveform_data": waveform_data, "audio_file_url": audio_file_url})
 
 @app.route('/process_youtube', methods=['POST'])
 def process_youtube():
