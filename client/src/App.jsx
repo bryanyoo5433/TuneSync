@@ -1,7 +1,5 @@
 import react, { useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 
@@ -48,15 +46,6 @@ const App = () => {
 
   return (
     <>
-      {/*<div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>*/}
       <div className='text-grey-900 h-screen w-full flex flex-col'>
 
         {/* Header */}
@@ -72,7 +61,9 @@ const App = () => {
         {/* Main Content */}
         <main className='graph-container'>
           <div>
-            <h1 className='text-3xl font-bold mb-6 text-gray-800 text-center '>Convert Audio</h1>
+          <p className="text-lg font-inter">This is a sample paragraph.</p>
+
+            <h1 className='text-3xl font-bold font-garamond mb-6 text-gray-800 text-center'>Convert Audio</h1>
             <input
               type='text'
               value={youtubeLink}
@@ -104,12 +95,6 @@ const App = () => {
           </div>
         </main>
       </div>
-
-      {/*<div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>*/}
     </>
   )
 }
