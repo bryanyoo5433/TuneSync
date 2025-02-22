@@ -52,9 +52,10 @@ def generate_waveform(audio_file):
     # plt.grid()
     # plt.show()
 
+    times = [round(t, 1) if isinstance(t, float) else float(t) for t in times]
 
     response_data = {
-        "times": times.tolist(),
+        "times": times,
         "dynamics": smoothed_loudness.tolist()
     }
 
