@@ -1,6 +1,7 @@
-import react, { useState } from 'react'
+import React from 'react';
+import Record from './record';
+import '../App.css'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import './App.css'
 
 
 const audioProcessing = () => {
@@ -49,7 +50,7 @@ const App = () => {
       <div className='text-grey-900 h-screen w-full flex flex-col'>
 
         {/* Header */}
-        <header className='w-full p-4 flex justify-between items-center border-b border-gray-300'>
+        <header className='header'>
           <div className='text-2xl font-bold'>TuneSync</div>
           <nav>
             <ul className='flex space-x-6 text-gray-700 font-medium'>
@@ -61,14 +62,12 @@ const App = () => {
         {/* Main Content */}
         <main className='graph-container'>
           <div>
-          <p className="text-lg font-inter">This is a sample paragraph.</p>
-
             <h1 className='text-3xl font-bold font-garamond mb-6 text-gray-800 text-center'>Convert Audio</h1>
             <input
               type='text'
               value={youtubeLink}
               onChange={(e) => setYoutubeLink(e.target.value)}
-              className='block w-full bg-white p-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-gray-500 focus:border-gray-500 shadow-md'
+              className='link-box'
               placeholder='Enter YouTube link'
             />
             <button
@@ -98,4 +97,4 @@ const App = () => {
   )
 }
 
-export default App;
+export default Home;
