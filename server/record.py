@@ -41,6 +41,6 @@ def get_audio_length(file_path):
     return duration
 
 # Example usage
-output_file = "user_recording.wav"
+output_file = "user_recording.mp3"
 duration = 5 + get_audio_length("/Users/christinalee/TuneSync/server/my_audio.mp3") # duration is currently 5 seconds more than the youtube mp3
 record_audio(output_file, duration)

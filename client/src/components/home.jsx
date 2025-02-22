@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Record from './record';
 import '../App.css'
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const audioProcessing = () => {
@@ -8,10 +9,11 @@ const audioProcessing = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const [audioUrl, setAudioUrl] = useState("");  // State for audio URL
+  const [isPlaying, setIsPlaying] = useState(false);  // State for tracking if audio is playing
 
   const fetchData = async () => {
     if (!youtubeLink) return;
@@ -48,7 +50,6 @@ const audioProcessing = () => {
   // Updated processData to match the new response format
   const processData = () => {
     if (!data || !data.waveform_data || !data.waveform_data.times || !data.waveform_data.dynamics) return [];
-
     return data.waveform_data.times.map((time, index) => ({
       time,
       dynamics: data.waveform_data.dynamics[index]
@@ -120,6 +121,7 @@ const audioProcessing = () => {
 const Home = () => {
   const { youtubeLink, setYoutubeLink, fetchData, processData, data, error, isRecording, startRecording, stopRecording, isLoading, audioURL } = audioProcessing();
 
+
   return (
     <div className="text-grey-900 h-screen w-full flex flex-col">
       {/* Header */}
@@ -182,7 +184,6 @@ const Home = () => {
           )}
         </div>
       </main>
-
 
       {/* Play Audio Button (Only appears after the audio URL is received) */}
       {data && (
