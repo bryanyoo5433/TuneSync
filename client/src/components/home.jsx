@@ -7,17 +7,18 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const audioProcessing = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   const fetchData = async () => {
     if (!youtubeLink) return;
 
-    const mockData = {
+    {/*const mockData = {
       times: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
       dynamics: [0.15, 0.25, 0.78, 0.92, 0.85, 0.67, 0.55]
     };
-    setData(mockData);
+    setData(mockData);*/}
 
-    {/*try {
+    try {
       const response = await fetch("http://localhost:5173/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,7 +29,7 @@ const audioProcessing = () => {
       setData(data);
     } catch (error) {
       console.error(error);
-    }*/}
+    }
   };
 
   const processData = () => {
