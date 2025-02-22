@@ -4,20 +4,21 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-function App() {
+
+const audioProcessing = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [data, setData] = useState(null);
 
   const fetchData = async () => {
     if (!youtubeLink) return;
 
-    {/*const mockData = {
+    const mockData = {
       times: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
       dynamics: [0.15, 0.25, 0.78, 0.92, 0.85, 0.67, 0.55]
     };
-    setData(mockData);*/}
+    setData(mockData);
 
-    try {
+    {/*try {
       const response = await fetch("http://localhost:5173/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,7 +29,7 @@ function App() {
       setData(data);
     } catch (error) {
       console.error(error);
-    }
+    }*/}
   };
 
   const processData = () => {
@@ -38,8 +39,12 @@ function App() {
       dynamics: data.dynamics[index]
     }));
   };
+  return { youtubeLink, setYoutubeLink, fetchData, processData, data };
+}
 
 
+const App = () => {
+  const { youtubeLink, setYoutubeLink, fetchData, processData, data } = audioProcessing();
 
   return (
     <>
@@ -52,7 +57,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>*/}
-      <div className='bg-white text-grey-900 h-screen flex flex-col'>
+      <div className='text-grey-900 h-screen w-full flex flex-col'>
 
         {/* Header */}
         <header className='w-full p-4 flex justify-between items-center border-b border-gray-300'>
@@ -65,9 +70,9 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className='flex-grow flex items-center justify-center'>
+        <main className='graph-container'>
           <div>
-            <h1 className='text-3xl font-bold mb-6 text-gray-800 text-center'>Convert Audio</h1>
+            <h1 className='text-3xl font-bold mb-6 text-gray-800 text-center '>Convert Audio</h1>
             <input
               type='text'
               value={youtubeLink}
@@ -77,14 +82,15 @@ function App() {
             />
             <button
               onClick={fetchData}
+              
               className='mt-4 w-full py-3 px-4 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-lg shadow-md transition duration-300'
             >
               Upload
             </button>
             {data && (
-              <div className='mt-6 p-6 bg-white rounded-lg shadow-md'>
+              <div className='mt-6 p-6 bg-white rounded-lg shadow-md w-full max-w-5xl mx-auto'>
                 <h2 className='text-2xl font-bold mb-4 text-gray-800 text-center'>Dynamics Over Time</h2>
-                <ResponsiveContainer width='100%' height={200}>
+                <ResponsiveContainer width='100%' height={400}>
                   <LineChart data={processData()}>
                     <CartesianGrid strokeDasharray='3 3' stroke='#d1d5db' />
                     <XAxis dataKey='time' tick={{ fill: '#4b5563' }} label={{ value: 'Time (s)', position: 'insideBottom', fill: '#4b5563' }} />
@@ -108,4 +114,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
