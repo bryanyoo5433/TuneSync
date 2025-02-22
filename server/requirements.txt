@@ -7,3 +7,4 @@ flask-cors
 numpy
 sounddevice
 yt_dlp
+imageio[ffmpeg]
