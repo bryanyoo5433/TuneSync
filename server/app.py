@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
@@ -8,12 +8,9 @@ from youtube_to_mp3 import download_youtube_audio
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = './uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['AUDIO_FOLDER'] = 'audio_files'
+os.makedirs(app.config['AUDIO_FOLDER'], exist_ok=True)
 
-# Ensure upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -43,14 +40,23 @@ def process_youtube():
 
     # Download the audio from YouTube
     try:
-        download_youtube_audio(youtube_url, "downloaded_audio.mp3")
+        output_path = download_youtube_audio(youtube_url, "downloaded_audio.mp3")
     except Exception as e:
         return jsonify({"error": f"Error downloading audio: {str(e)}"}), 500
 
+    if not output_path:
+        return jsonify({"error": "Error downloading audio"}), 500
+    
     # Generate waveform data from the downloaded audio
-    waveform_data = generate_waveform("downloaded_audio.mp3")
+    waveform_data = generate_waveform(output_path)
 
-    return jsonify(waveform_data)
+    audio_file_url = f"http://127.0.0.1:5000/audio_files/downloaded_audio.mp3"
+
+    return jsonify({"waveform_data": waveform_data, "audio_file_url": audio_file_url})
+
+@app.route('/audio_files/<path:filename>', methods=['GET'])
+def serve_audio(filename):
+    return send_from_directory(app.config['AUDIO_FOLDER'], filename)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
