@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Record from './record';
 import '../App.css'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -42,7 +42,7 @@ const audioProcessing = () => {
 }
 
 
-const App = () => {
+const Home = () => {
   const { youtubeLink, setYoutubeLink, fetchData, processData, data } = audioProcessing();
 
   return (
@@ -51,7 +51,7 @@ const App = () => {
 
         {/* Header */}
         <header className='header'>
-          <div className='text-2xl font-bold'>TuneSync</div>
+          <div className='text-2xl style = {{color: "#013d5a" }}font-bold'>TuneSync</div>
           <nav>
             <ul className='flex space-x-6 text-gray-700 font-medium'>
               <li><a href='#' className='hover:text-green-700'>About</a></li>
@@ -60,14 +60,14 @@ const App = () => {
         </header>
 
         {/* Main Content */}
-        <main className='graph-container'>
+        <main className=''>
           <div>
-            <h1 className='text-3xl font-bold font-garamond mb-6 text-gray-800 text-center'>Convert Audio</h1>
+            <h1 className='text-3xl font-bold font-garamond mb-6 text-center'>Convert Audio</h1>
             <input
               type='text'
               value={youtubeLink}
               onChange={(e) => setYoutubeLink(e.target.value)}
-              className='link-box'
+              className='link-box text-center'
               placeholder='Enter YouTube link'
             />
             <button
