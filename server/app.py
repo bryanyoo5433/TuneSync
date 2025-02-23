@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 import os
 from waveform import generate_waveform
 from youtube_to_mp3 import download_youtube_audio
+from generate_advice import gen
 
 app = Flask(__name__)
 CORS(app)
@@ -58,6 +59,14 @@ def process_youtube():
     audio_file_url = f"http://127.0.0.1:5000/audio_files/downloaded_audio.mp3"
 
     return jsonify({"waveform_data": waveform_data, "audio_file_url": audio_file_url})
+
+@app.route('/compare-audio', methods=['POST'])
+def compare_audio():
+    if 'expected_audio' not in request.files or 'actual_audio' not in request.files:
+        return jsonify({"error": "Both 'expected_audio' and 'actual_audio' files are required"}), 400
+
+    response = gen()
+    return jsonify({"result": response.text})
 
 @app.route('/audio_files/<path:filename>', methods=['GET'])
 def serve_audio(filename):
