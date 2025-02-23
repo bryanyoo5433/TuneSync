@@ -6,7 +6,7 @@ import AudioProcessor from './audioprocessor';
 import Record from './record';
 
 const Home = () => {
-  const { youtubeLink, setYoutubeLink, fetchData, processData, data, audioUrl, toggleAudio, isPlaying, handleAudioEnd } = AudioProcessor();
+  const { youtubeLink, setYoutubeLink, fetchData, processData, data, audioUrl, toggleAudio, isPlaying, handleAudioEnd, loading } = AudioProcessor();
 
   return (
     <div className="text-grey-900 h-screen w-full flex flex-col">
@@ -25,8 +25,14 @@ const Home = () => {
           className="link-box text-center"
           placeholder="Enter YouTube link"
         />
-        <button onClick={fetchData} className="upload-button">
-          Upload
+        {/* Upload Button with Spinner */}
+        <button onClick={fetchData} className="upload-button" disabled={loading}>
+          {loading ? (
+            <div className="processing-container">
+              <div className="spinner"></div>
+              Processing...
+            </div>
+          ) : "Upload"}
         </button>
 
         {/* Waveform Graph */}
@@ -34,48 +40,51 @@ const Home = () => {
           <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
             <h2 className="text-2xl font-bold mb-4 text-center">Dynamics Over Time</h2>
             <ResponsiveContainer width="100%" height={400}>
-                 <LineChart data={processData(data)} margin={{ bottom: 30 }}>
-                   <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
-                   <XAxis dataKey="time" tick={{ fill: "#4b5563" }}
-                     label={{
-                       value: "Time (s)",
-                       position: "insideBottom",
-                       offset: -15,
-                       fill: "#4b5563"
-                     }}
-                   />
-                   <YAxis tick={{ fill: "#4b5563" }}
-                     label={{
-                       value: "Loudness",
-                       angle: -90,
-                       position: "insideLeft",
-                       fill: "#4b5563"
-                     }}
-                   />
-                   <Tooltip wrapperStyle={{ color: "black" }} />
-                   <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
-                 </LineChart>
-               </ResponsiveContainer>
+              <LineChart data={processData(data)} margin={{ bottom: 30 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+                <XAxis dataKey="time" tick={{ fill: "#4b5563" }}
+                  label={{
+                    value: "Time (s)",
+                    position: "insideBottom",
+                    offset: -15,
+                    fill: "#4b5563"
+                  }}
+                />
+                <YAxis tick={{ fill: "#4b5563" }}
+                  label={{
+                    value: "Loudness",
+                    angle: -90,
+                    position: "insideLeft",
+                    fill: "#4b5563"
+                  }}
+                  tickFormatter={(tick) => {
+                    const meanLoudness = 0.5; // Replace with actual mean calculation
+                    if (tick === meanLoudness) return 'm';
+                    if (tick > meanLoudness) return tick > 0.75 ? 'f' : 'mf';
+                    return tick < 0.25 ? 'p' : 'mp';
+                  }}
+                />
+                <Tooltip wrapperStyle={{ color: "black" }} />
+                <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         )}
 
         {/* Play Audio Button (Only appears after the audio URL is received) */}
         {audioUrl && (
-          <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
-            <button
-              onClick={toggleAudio}
-              className="play-button w-48 h-24 outline-black"
-            >
-              <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+          <>
+            <button onClick={toggleAudio} className="playaudio-button">
+              <h1>{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
             </button>
             <audio
               id="audioPlayer"
               src={audioUrl}
               onEnded={handleAudioEnd} // Reset state after audio ends
             />
-          </div>
+          </>
         )}
-        
+
         {audioUrl && (
           <Record />
         )}
