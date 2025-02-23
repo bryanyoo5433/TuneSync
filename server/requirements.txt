@@ -9,3 +9,6 @@ sounddevice
 yt_dlp
 imageio[ffmpeg]
 pydub
+joblib
+google
+dotenv
