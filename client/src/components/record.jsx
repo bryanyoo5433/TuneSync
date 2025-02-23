@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AudioProcessor from "./audioprocessor"; // Import Audio Processor
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 const Record = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -12,6 +12,41 @@ const Record = () => {
   const audioChunksRef = useRef([]);
 
   const { referenceWaveform } = AudioProcessor(); // Get YouTube waveform
+
+  // Audio playback logic
+  const audioRef = useRef(null);
+  const intervalRef = useRef(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const startPlayback = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        clearInterval(intervalRef.current);
+      } else {
+        audioRef.current.play();
+        setCurrentTime(0);
+        intervalRef.current = setInterval(() => {
+          if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+          }
+        }, 100);
+      }
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.addEventListener("ended", () => {
+        clearInterval(intervalRef.current);
+        setCurrentTime(0);
+        setIsPlaying(false);
+      });
+    }
+    return () => clearInterval(intervalRef.current);
+  }, []);
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -55,10 +90,9 @@ const Record = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        // Set the waveform data directly from the backend response
-        setWaveformData(data.waveform_data);  // Save raw waveform data
-        const processed = processData(data.waveform_data);  // Process it for graphing
-        setProcessedData(processed);  // Store the processed data for graphing
+        setWaveformData(data.waveform_data);
+        const processed = processData(data.waveform_data);
+        setProcessedData(processed);
       } else {
         console.error('Error uploading file:', data.error);
       }
@@ -67,10 +101,8 @@ const Record = () => {
     }
   };
 
-  // Process data function to format it for the graph
   const processData = (waveformData) => {
     if (!waveformData || !waveformData.times || !waveformData.dynamics) return [];
-
     return waveformData.times.map((time, index) => ({
       time,
       dynamics: waveformData.dynamics[index],
@@ -78,10 +110,8 @@ const Record = () => {
   };
 
   const handleProceedToAnalyze = () => {
-
-    console.log("User waveform:", userWaveform);
+    console.log("User waveform:", waveformData);
     console.log("Reference waveform:", referenceWaveform);
-
     if (waveformData && referenceWaveform) {
       navigate("/analyze", { state: { userWaveform: waveformData, referenceWaveform } });
     } else {
@@ -91,7 +121,6 @@ const Record = () => {
 
   return (
     <div className="items-center text-grey-900 h-screen w-full flex flex-col">
-      {/* Display Waveform Graph Above the Record Button */}
       {processedData && (
         <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold mb-4 text-center">Dynamics Over Time</h2>
@@ -114,7 +143,7 @@ const Record = () => {
                   fill: "#4b5563"
                 }}
                 tickFormatter={(tick) => {
-                  const meanLoudness = 0.5; // Replace with actual mean calculation
+                  const meanLoudness = 0.5;
                   if (tick === meanLoudness) return 'm';
                   if (tick > meanLoudness) return tick > 0.75 ? 'f' : 'mf';
                   return tick < 0.25 ? 'p' : 'mp';
@@ -122,15 +151,39 @@ const Record = () => {
               />
               <Tooltip wrapperStyle={{ color: "black" }} />
               <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
+
+              {/* Moving Dot */}
+              {
+                processedData?.length > 0 && (() => {
+                  const closestPoint = processedData.reduce((prev, curr) =>
+                    Math.abs(curr.time - currentTime) < Math.abs(prev.time - currentTime) ? curr : prev
+                  );
+                  return (
+                    <Line
+                      type="monotone"
+                      dataKey="dynamics"
+                      stroke="none"
+                      dot={(props) => {
+                        const { cx, cy, payload } = props;
+                        return payload.time === closestPoint.time ? (
+                          <circle cx={cx} cy={cy} r={6} fill="blue" />
+                        ) : null;
+                      }}
+                    />
+                  );
+                })()
+              }
+
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
-      <div className="text-center flex flex-row items-center space-x-6 mt-8"> {/* Added spacing between buttons */}
+
+      <div className="text-center flex flex-row items-center space-x-6 mt-8">
         <button
           onClick={isRecording ? stopRecording : startRecording}
           style={{
-            backgroundColor: isRecording ? "#899481" : "#304f6d", // Active color
+            backgroundColor: isRecording ? "#899481" : "#304f6d",
           }}
           className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[300px]"
         >
@@ -146,23 +199,15 @@ const Record = () => {
           </button>
         )}
 
-
-        {/* Play Audio Button (Only appears after the audio URL is received) */}
-        {/* {processedData && (
-          <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
-            <button
-              onClick={toggleAudio}
-              className="play-button w-48 h-24 outline-black"
-            >
-              <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+        {/* Play Audio Button */}
+        {audioURL && (
+          <>
+            <button onClick={startPlayback} className="playaudio-button">
+              <h1>{isPlaying ? "Pause Audio" : "Play Audio"}</h1>
             </button>
-            <audio
-              id="audioPlayer"
-              src={audioUrl}
-              onEnded={handleAudioEnd}
-            />
-          </div>
-        )}   */}
+            <audio ref={audioRef} id="audioPlayer" src={audioURL} onEnded={() => setIsPlaying(false)} />
+          </>
+        )}
       </div>
     </div>
   );
