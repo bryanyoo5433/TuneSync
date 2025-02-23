@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AudioProcessor from "./audioprocessor"; // Import Audio Processor
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -7,11 +7,13 @@ const Record = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [waveformData, setWaveformData] = useState(null);
-  const [processedData, setProcessedData] = useState(null);  // To store processed data for graph rendering
+  const [processedData, setProcessedData] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  
+  const navigate = useNavigate();  // Add this line to use navigate
 
-  const { referenceWaveform } = AudioProcessor(); // Get YouTube waveform
+  const { referenceWaveform } = AudioProcessor();
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -29,7 +31,6 @@ const Record = () => {
       setAudioURL(url);
       audioChunksRef.current = [];
 
-      // Send the audio file to the Flask backend
       await uploadAudio(audioBlob);
     };
 
@@ -55,10 +56,9 @@ const Record = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        // Set the waveform data directly from the backend response
-        setWaveformData(data.waveform_data);  // Save raw waveform data
-        const processed = processData(data.waveform_data);  // Process it for graphing
-        setProcessedData(processed);  // Store the processed data for graphing
+        setWaveformData(data.waveform_data);
+        const processed = processData(data.waveform_data);
+        setProcessedData(processed);
       } else {
         console.error('Error uploading file:', data.error);
       }
@@ -67,10 +67,8 @@ const Record = () => {
     }
   };
 
-  // Process data function to format it for the graph
   const processData = (waveformData) => {
     if (!waveformData || !waveformData.times || !waveformData.dynamics) return [];
-
     return waveformData.times.map((time, index) => ({
       time,
       dynamics: waveformData.dynamics[index],
@@ -78,55 +76,29 @@ const Record = () => {
   };
 
   const handleProceedToAnalyze = () => {
-
-    console.log("User waveform:", userWaveform);
-    console.log("Reference waveform:", referenceWaveform);
-
-    if (waveformData && referenceWaveform) {
-      navigate("/analyze", { state: { userWaveform: waveformData, referenceWaveform } });
-    } else {
-      alert("Please record your audio and load a reference first!");
-    }
+    // Ensure the waveforms are ready to be sent
+    navigate('/analyze')
   };
 
   return (
     <div className="items-center text-grey-900 h-screen w-full flex flex-col">
-      {/* Display Waveform Graph Above the Record Button */}
+      {/* Display waveform graph if data is available */}
       {processedData && (
         <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold mb-4 text-center">Dynamics Over Time</h2>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={processedData} margin={{ bottom: 30 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
-              <XAxis dataKey="time" tick={{ fill: "#4b5563" }}
-                label={{
-                  value: "Time (s)",
-                  position: "insideBottom",
-                  offset: -15,
-                  fill: "#4b5563"
-                }}
-              />
-              <YAxis tick={{ fill: "#4b5563" }}
-                label={{
-                  value: "Loudness",
-                  angle: -90,
-                  position: "insideLeft",
-                  fill: "#4b5563"
-                }}
-                tickFormatter={(tick) => {
-                  const meanLoudness = 0.5; // Replace with actual mean calculation
-                  if (tick === meanLoudness) return 'm';
-                  if (tick > meanLoudness) return tick > 0.75 ? 'f' : 'mf';
-                  return tick < 0.25 ? 'p' : 'mp';
-                }}
-              />
+              <XAxis dataKey="time" tick={{ fill: "#4b5563" }} />
+              <YAxis tick={{ fill: "#4b5563" }} />
               <Tooltip wrapperStyle={{ color: "black" }} />
               <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
-      <div className="text-center flex flex-row items-center space-x-6 mt-8"> {/* Added spacing between buttons */}
+
+      <div className="text-center flex flex-row items-center space-x-6 mt-8">
         <button
           onClick={isRecording ? stopRecording : startRecording}
           style={{
@@ -140,29 +112,11 @@ const Record = () => {
         {processedData && (
           <button
             onClick={handleProceedToAnalyze}
-            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[200px]"
+            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] px-6 py-3 min-w-[200px]"
           >
             Analyze
           </button>
         )}
-
-
-        {/* Play Audio Button (Only appears after the audio URL is received) */}
-        {/* {processedData && (
-          <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
-            <button
-              onClick={toggleAudio}
-              className="play-button w-48 h-24 outline-black"
-            >
-              <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
-            </button>
-            <audio
-              id="audioPlayer"
-              src={audioUrl}
-              onEnded={handleAudioEnd}
-            />
-          </div>
-        )}   */}
       </div>
     </div>
   );

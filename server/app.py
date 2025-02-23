@@ -60,13 +60,12 @@ def process_youtube():
 
     return jsonify({"waveform_data": waveform_data, "audio_file_url": audio_file_url})
 
-@app.route('/compare-audio', methods=['POST'])
+@app.route('/compare-audio', methods=['GET'])
 def compare_audio():
-    if 'expected_audio' not in request.files or 'actual_audio' not in request.files:
-        return jsonify({"error": "Both 'expected_audio' and 'actual_audio' files are required"}), 400
-
-    response = gen()
-    return jsonify({"result": response.text})
+    result = gen()
+    if "error" in result:
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route('/audio_files/<path:filename>', methods=['GET'])
 def serve_audio(filename):
