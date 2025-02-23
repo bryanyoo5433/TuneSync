@@ -5,6 +5,7 @@ import os
 from waveform import generate_waveform
 from youtube_to_mp3 import download_youtube_audio
 from generate_advice import gen
+from scorepiece import use_trained_model
 
 app = Flask(__name__)
 CORS(app)
@@ -63,9 +64,11 @@ def process_youtube():
 @app.route('/compare-audio', methods=['GET'])
 def compare_audio():
     result = gen()
+    score = use_trained_model('./uploads/recording.wav')
     if "error" in result:
         return jsonify(result), 500
-    return jsonify(result)
+    
+    return jsonify({"result": result, "score": score})
 
 @app.route('/audio_files/<path:filename>', methods=['GET'])
 def serve_audio(filename):

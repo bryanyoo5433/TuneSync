@@ -182,14 +182,14 @@ def train_model():
     scorer = PerformanceScorer.train_new(training_files, training_scores)
     scorer.save("trained_model")
 
-def main():
-    # used for testing model
-    loaded_scorer = PerformanceScorer.load("trained_model")
-    score, confidence = loaded_scorer.score_performance('../audio_files/downloaded_audio.mp3')
+# def main():
+#     # used for testing model
+#     loaded_scorer = PerformanceScorer.load("trained_model")
+#     score, confidence = loaded_scorer.score_performance('../audio_files/downloaded_audio.mp3')
     
-    print(f"Performance Score: {score}/100")
-    print(f"Confidence: {confidence['confidence']}%")
-    print(f"Score Range: {confidence['min_score']}-{confidence['max_score']}")
+#     print(f"Performance Score: {score}/100")
+#     print(f"Confidence: {confidence['confidence']}%")
+#     print(f"Score Range: {confidence['min_score']}-{confidence['max_score']}")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
