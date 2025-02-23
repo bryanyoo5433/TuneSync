@@ -26,7 +26,7 @@ const Home = () => {
           placeholder="Enter YouTube link"
         />
         {/* Upload Button with Spinner */}
-        <button onClick={fetchData} className="upload-button" disabled={loading}>
+        <button onClick={fetchData} className="upload-button px-6 py-10 min-w-[300px]" disabled={loading}>
           {loading ? (
             <div className="processing-container">
               <div className="spinner"></div>
@@ -58,7 +58,7 @@ const Home = () => {
                     fill: "#4b5563"
                   }}
                   tickFormatter={(tick) => {
-                    const meanLoudness = 0.5; // Replace with actual mean calculation
+                    const meanLoudness = 0.5;
                     if (tick === meanLoudness) return 'm';
                     if (tick > meanLoudness) return tick > 0.75 ? 'f' : 'mf';
                     return tick < 0.25 ? 'p' : 'mp';
@@ -81,7 +81,7 @@ const Home = () => {
               }}
               className="font-semibold rounded-lg shadow-md transition duration-300 mt-8 hover:bg-[#899481] text-white px-6 py-10 min-w-[300px]"
             >
-              <h1>{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+              <div>{isPlaying ? 'Pause Audio' : 'Play Audio'}</div>
             </button>
             <audio
               id="audioPlayer"

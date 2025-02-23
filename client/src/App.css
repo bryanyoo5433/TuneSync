@@ -19,7 +19,7 @@
 .link-box {
   display: block;
   margin: 0rem auto;
-  width: 50%;
+  width: 75%;
   align-items: center;
   color: #304f6d;
   background-color: white;
@@ -31,7 +31,6 @@
 
 .upload-button {
   margin: 1rem auto;
-  width: 50%;
   padding: 0.75rem;
   background-color: #304f6d;
   color: white;

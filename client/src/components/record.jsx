@@ -1,17 +1,33 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AudioProcessor from "./audioprocessor"; // Import Audio Processor
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Record = () => {
   const [isRecording, setIsRecording] = useState(false);
+  const [countdown, setCountdown] = useState(null);
   const [audioURL, setAudioURL] = useState(null);
   const [waveformData, setWaveformData] = useState(null);
   const [processedData, setProcessedData] = useState(null);  // To store processed data for graph rendering
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  const { referenceWaveform } = AudioProcessor(); // Get YouTube waveform
+  const { referenceWaveform, fetchData } = AudioProcessor(); // Get YouTube waveform
+
+  const startCountdown = () => {
+    setCountdown(3); // Start from 3 seconds
+    let count = 3;
+
+    const interval = setInterval(() => {
+      count -= 1;
+      setCountdown(count);
+
+      if (count === 0) {
+        clearInterval(interval);
+        setCountdown(null); // Hide countdown after finishing
+        startRecording(); // Start recording after countdown
+      }
+    }, 1000);
+  };
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -78,10 +94,6 @@ const Record = () => {
   };
 
   const handleProceedToAnalyze = () => {
-
-    console.log("User waveform:", userWaveform);
-    console.log("Reference waveform:", referenceWaveform);
-
     if (waveformData && referenceWaveform) {
       navigate("/analyze", { state: { userWaveform: waveformData, referenceWaveform } });
     } else {
@@ -126,43 +138,31 @@ const Record = () => {
           </ResponsiveContainer>
         </div>
       )}
+
       <div className="text-center flex flex-row items-center space-x-6 mt-8"> {/* Added spacing between buttons */}
-        <button
-          onClick={isRecording ? stopRecording : startRecording}
-          style={{
-            backgroundColor: isRecording ? "#899481" : "#304f6d", // Active color
-          }}
-          className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[300px]"
-        >
-          {isRecording ? 'Stop Recording' : 'Start Recording'}
-        </button>
-
-        {processedData && (
-          <button
-            onClick={handleProceedToAnalyze}
-            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[200px]"
-          >
-            Analyze
-          </button>
-        )}
-
-
-        {/* Play Audio Button (Only appears after the audio URL is received) */}
-        {/* {processedData && (
-          <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
+        {countdown !== null ? (
+          <div className="text-4xl font-bold text-#304f6d">{countdown}</div> // Shows 3,2,1 countdown, get color
+        ) : (
+          <>
             <button
-              onClick={toggleAudio}
-              className="play-button w-48 h-24 outline-black"
+              onClick={isRecording ? stopRecording : startCountdown}
+              style={{
+                backgroundColor: isRecording ? "#899481" : "#304f6d", // Active color
+              }}
+              className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[300px]"
             >
-              <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+              {isRecording ? 'Stop Recording' : 'Start Recording'}
             </button>
-            <audio
-              id="audioPlayer"
-              src={audioUrl}
-              onEnded={handleAudioEnd}
-            />
-          </div>
-        )}   */}
+            {processedData && (
+              <button
+                onClick={handleProceedToAnalyze}
+                className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[200px]"
+              >
+                Analyze
+              </button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

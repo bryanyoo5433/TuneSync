@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const AudioProcessor = () => {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [data, setData] = useState(null);
+  const [referenceWaveform, setReferenceWaveform] = useState(null); // Added state for reference waveform
   const [error, setError] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -26,8 +27,8 @@ const AudioProcessor = () => {
       setAudioUrl(result.audio_file_url);
   
       if (result.waveform_data) {
-        setReferenceWaveform(processData(result.waveform_data));
-        console.log("Reference waveform set:", processData(result.waveform_data)); // ✅ Debugging
+        const processedWaveform = processData(result.waveform_data);
+        setReferenceWaveform(processedWaveform); // Store the processed reference waveform
       }
   
       setLoading(false);
@@ -60,7 +61,8 @@ const AudioProcessor = () => {
     setIsPlaying(false);
   };
 
-  return { youtubeLink, setYoutubeLink, fetchData, processData, data, audioUrl, toggleAudio, isPlaying, handleAudioEnd, loading };
+  return { youtubeLink, setYoutubeLink, fetchData, processData, data, referenceWaveform, // Now returning referenceWaveform
+    audioUrl, toggleAudio, isPlaying, handleAudioEnd, loading };
 };
 
 export default AudioProcessor;
