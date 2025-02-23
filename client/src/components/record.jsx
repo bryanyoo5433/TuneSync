@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState, useEffect, useRef } from 'react';
-=======
 import React, { useState, useRef, useEffect } from 'react';
->>>>>>> 4c9cf1a625c95bc44c0461b794e0f28e7268a8e9
 import { useNavigate } from 'react-router-dom';
 import AudioProcessor from "./audioprocessor"; // Import Audio Processor
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
