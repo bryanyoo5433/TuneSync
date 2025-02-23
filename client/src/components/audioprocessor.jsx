@@ -9,27 +9,31 @@ const AudioProcessor = () => {
   const [loading, setLoading] = useState(false); // New state for loading
 
   const fetchData = async () => {
-    if (!youtubeLink) return;
-    setLoading(true); // Set loading to true when the request starts
-
+    setLoading(true);
     try {
       const response = await fetch("http://127.0.0.1:5000/process_youtube", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ youtube_url: youtubeLink })
+        body: JSON.stringify({ youtube_url: youtubeLink }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch waveform data");
       }
-
+  
       const result = await response.json();
       setData(result);
       setAudioUrl(result.audio_file_url);
-      setLoading(false); // Stop loading when data is received
+  
+      if (result.waveform_data) {
+        setReferenceWaveform(processData(result.waveform_data));
+        console.log("Reference waveform set:", processData(result.waveform_data)); // ✅ Debugging
+      }
+  
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching waveform data:", error);
-      setLoading(false); // Stop loading if there's an error
+      setLoading(false);
     }
   };
 

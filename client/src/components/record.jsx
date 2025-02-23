@@ -81,7 +81,7 @@ const Record = () => {
 
     console.log("User waveform:", userWaveform);
     console.log("Reference waveform:", referenceWaveform);
-    
+
     if (waveformData && referenceWaveform) {
       navigate("/analyze", { state: { userWaveform: waveformData, referenceWaveform } });
     } else {
@@ -90,7 +90,7 @@ const Record = () => {
   };
 
   return (
-    <div className="text-grey-900 h-screen w-full flex flex-col">
+    <div className="items-center text-grey-900 h-screen w-full flex flex-col">
       {/* Display Waveform Graph Above the Record Button */}
       {processedData && (
         <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
@@ -126,10 +126,13 @@ const Record = () => {
           </ResponsiveContainer>
         </div>
       )}
-      <div className="text-center flex flex-row items-center">
+      <div className="text-center flex flex-row items-center space-x-6 mt-8"> {/* Added spacing between buttons */}
         <button
           onClick={isRecording ? stopRecording : startRecording}
-          className={`font-semibold rounded-lg shadow-md transition duration-300 ${isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+          style={{
+            backgroundColor: isRecording ? "#899481" : "#304f6d", // Active color
+          }}
+          className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[300px]"
         >
           {isRecording ? 'Stop Recording' : 'Start Recording'}
         </button>
@@ -137,11 +140,12 @@ const Record = () => {
         {processedData && (
           <button
             onClick={handleProceedToAnalyze}
-            className="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 px-4 py-2"
+            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[200px]"
           >
             Analyze
           </button>
         )}
+
 
         {/* Play Audio Button (Only appears after the audio URL is received) */}
         {/* {processedData && (
