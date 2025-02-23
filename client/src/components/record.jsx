@@ -12,7 +12,7 @@ const Record = () => {
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorderRef.current = new MediaRecorder(stream);
-    
+
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0) {
         audioChunksRef.current.push(event.data);
@@ -74,7 +74,7 @@ const Record = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="text-grey-900 h-screen w-full flex flex-col">
       {/* Display Waveform Graph Above the Record Button */}
       {processedData && (
         <div className="mt-6 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
@@ -97,6 +97,12 @@ const Record = () => {
                   position: "insideLeft",
                   fill: "#4b5563"
                 }}
+                tickFormatter={(tick) => {
+                  const meanLoudness = 0.5; // Replace with actual mean calculation
+                  if (tick === meanLoudness) return 'm';
+                  if (tick > meanLoudness) return tick > 0.75 ? 'f' : 'mf';
+                  return tick < 0.25 ? 'p' : 'mp';
+                }}
               />
               <Tooltip wrapperStyle={{ color: "black" }} />
               <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
@@ -104,9 +110,7 @@ const Record = () => {
           </ResponsiveContainer>
         </div>
       )}
-
-      <div className="text-center flex flex-row items-center space-y-4 px-6 py-3">
-        {/* Record Button */}
+      <div className="text-center flex flex-row items-center">
         <button
           onClick={isRecording ? stopRecording : startRecording}
           className={` font-semibold rounded-lg shadow-md transition duration-300 ${isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
@@ -114,9 +118,8 @@ const Record = () => {
           {isRecording ? 'Stop Recording' : 'Start Recording'}
         </button>
 
-        <button>test</button>
-        {/* Play Audio Button (Only appears after the audio URL is received) */}
-        {/* {processedData && (
+      {/* Play Audio Button (Only appears after the audio URL is received) */}
+      {/* {processedData && (
           <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
             <button
               onClick={toggleAudio}
@@ -131,7 +134,7 @@ const Record = () => {
             />
           </div>
         )}   */}
-      </div>
+    </div>
     </div>
   );
 };
