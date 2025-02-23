@@ -33,12 +33,12 @@ body {
   min-height: 100vh;
   background-color: #fcf3e3;
 }
-
+/* 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
   color: #013d5a;
-}
+} */
 
 button {
   border-radius: 8px;

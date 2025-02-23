@@ -75,7 +75,7 @@ const Home = () => {
         {audioUrl && (
           <>
             <button onClick={toggleAudio} className="playaudio-button">
-              <h1 className="text-2xl !text-2xl font-bold">{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
+              <h1>{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
             </button>
             <audio
               id="audioPlayer"
