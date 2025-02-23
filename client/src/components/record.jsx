@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AudioProcessor from "./audioprocessor"; // Import Audio Processor
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import axios from 'axios';
+import AudioProcessor from "./audioprocessor";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Record = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -11,7 +11,10 @@ const Record = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   
-  const navigate = useNavigate();  // Add this line to use navigate
+  // Analysis states
+  const [analysisResult, setAnalysisResult] = useState('');
+  const [analysisError, setAnalysisError] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const { referenceWaveform } = AudioProcessor();
 
@@ -110,10 +113,41 @@ const Record = () => {
     }));
   };
 
-  const handleProceedToAnalyze = () => {
-    // Ensure the waveforms are ready to be sent
-    navigate('/analyze')
+  const handleAnalyze = async () => {
+    setIsAnalyzing(true);
+    setAnalysisResult('');
+    setAnalysisError('');
+    
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/compare-audio');
+      if (response.data.error) {
+        setAnalysisError(response.data.error);
+        setAnalysisResult('');
+      } else {
+        setAnalysisResult(response.data.result);
+        setAnalysisError('');
+      }
+    } catch (err) {
+      setAnalysisError('Error fetching analysis: ' + err.message);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
+
+  const splitAnalysisResult = (result) => {
+    const splitSentences = result.split(';').map((sentence, index) => {
+      if (index % 3 === 2) {
+        return (
+          <div key={index}>
+            <p className="text-left pb-4">{sentence.trim()}</p>
+          </div>
+        );
+      }
+      return <p key={index} className="text-left">{sentence.trim()}</p>;
+    });
+  
+    return splitSentences;
+  };  
 
   return (
     <div className="items-center text-grey-900 h-screen w-full flex flex-col">
@@ -147,64 +181,55 @@ const Record = () => {
               />
               <Tooltip wrapperStyle={{ color: "black" }} />
               <Line type="monotone" dataKey="dynamics" stroke="#4b5563" strokeWidth={2} dot={false} />
-
-              {/* Moving Dot */}
-              {
-                processedData?.length > 0 && (() => {
-                  const closestPoint = processedData.reduce((prev, curr) =>
-                    Math.abs(curr.time - currentTime) < Math.abs(prev.time - currentTime) ? curr : prev
-                  );
-                  return (
-                    <Line
-                      type="monotone"
-                      dataKey="dynamics"
-                      stroke="none"
-                      dot={(props) => {
-                        const { cx, cy, payload } = props;
-                        return payload.time === closestPoint.time ? (
-                          <circle cx={cx} cy={cy} r={6} fill="blue" />
-                        ) : null;
-                      }}
-                    />
-                  );
-                })()
-              }
-
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      <div className="text-center flex flex-row items-center space-x-6 mt-8">
-        <button
-          onClick={isRecording ? stopRecording : startRecording}
-          style={{
-            backgroundColor: isRecording ? "#899481" : "#304f6d",
-          }}
-          className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[300px]"
-        >
-          {isRecording ? 'Stop Recording' : 'Start Recording'}
-        </button>
-
-        {processedData && (
+      <div className="text-center mt-8">
+        <div className="flex flex-row items-center space-x-6 mb-16">
           <button
-            onClick={handleProceedToAnalyze}
-            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] px-6 py-3 min-w-[200px]"
+            onClick={isRecording ? stopRecording : startRecording}
+            style={{
+              backgroundColor: isRecording ? "#899481" : "#304f6d",
+            }}
+            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[300px]"
           >
-            Analyze
+            {isRecording ? 'Stop Recording' : 'Start Recording'}
           </button>
-        )}
 
-        {/* Play Audio Button */}
         {audioURL && (
-          <>
-            <button onClick={startPlayback} className="playaudio-button">
-              <h1>{isPlaying ? "Pause Audio" : "Play Audio"}</h1>
+            <>
+              <button onClick={startPlayback} className="playaudio-button">
+                <h1>{isPlaying ? "Pause Audio" : "Play Audio"}</h1>
+              </button>
+              <audio ref={audioRef} id="audioPlayer" src={audioURL} onEnded={() => setIsPlaying(false)} />
+            </>
+          )}
+        </div>
+        
+        {(analysisResult || analysisError) && (
+        <div className="mt-8 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4 text-center">Analysis Results</h2>
+          {analysisResult && splitAnalysisResult(analysisResult)}
+          {analysisError && <p className="text-left text-red-500">{analysisError}</p>}
+        </div>
+      )}
+        <div className="mt-6">
+        {processedData && (
+            <button
+              onClick={handleAnalyze}
+              className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] px-6 py-3 min-w-[200px] mb-24"
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Analyze'}
             </button>
-            <audio ref={audioRef} id="audioPlayer" src={audioURL} onEnded={() => setIsPlaying(false)} />
-          </>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Analysis Results Section */}
+    
     </div>
   );
 };

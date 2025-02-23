@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const Analyze = () => {
   const [result, setResult] = useState('');
+  const [accuracy, setAccuracy] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true); // To track loading state
 
@@ -12,9 +13,11 @@ const Analyze = () => {
       const response = await axios.get('http://127.0.0.1:5000/compare-audio');
       if (response.data.error) {
         setError(response.data.error);
+        console.log("error")
         setResult('');
       } else {
         setResult(response.data.result);
+        console.log("result")
         setError('');
       }
     } catch (err) {
