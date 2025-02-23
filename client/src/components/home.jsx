@@ -74,7 +74,13 @@ const Home = () => {
         {/* Play Audio Button (Only appears after the audio URL is received) */}
         {audioUrl && (
           <>
-            <button onClick={toggleAudio} className="playaudio-button">
+            <button
+              onClick={toggleAudio}
+              style={{
+                backgroundColor: isPlaying ? "#899481" : "#304f6d", // Green when playing, default blue-gray when not
+              }}
+              className="font-semibold rounded-lg shadow-md transition duration-300 mt-8 hover:bg-[#899481] text-white px-6 py-10 min-w-[300px]"
+            >
               <h1>{isPlaying ? 'Pause Audio' : 'Play Audio'}</h1>
             </button>
             <audio
