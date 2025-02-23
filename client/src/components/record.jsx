@@ -7,11 +7,13 @@ const Record = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [waveformData, setWaveformData] = useState(null);
-  const [processedData, setProcessedData] = useState(null);  // To store processed data for graph rendering
+  const [processedData, setProcessedData] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  
+  const navigate = useNavigate();  // Add this line to use navigate
 
-  const { referenceWaveform } = AudioProcessor(); // Get YouTube waveform
+  const { referenceWaveform } = AudioProcessor();
 
   // Audio playback logic
   const audioRef = useRef(null);
@@ -64,7 +66,6 @@ const Record = () => {
       setAudioURL(url);
       audioChunksRef.current = [];
 
-      // Send the audio file to the Flask backend
       await uploadAudio(audioBlob);
     };
 
@@ -110,13 +111,8 @@ const Record = () => {
   };
 
   const handleProceedToAnalyze = () => {
-    console.log("User waveform:", waveformData);
-    console.log("Reference waveform:", referenceWaveform);
-    if (waveformData && referenceWaveform) {
-      navigate("/analyze", { state: { userWaveform: waveformData, referenceWaveform } });
-    } else {
-      alert("Please record your audio and load a reference first!");
-    }
+    // Ensure the waveforms are ready to be sent
+    navigate('/analyze')
   };
 
   return (
@@ -193,7 +189,7 @@ const Record = () => {
         {processedData && (
           <button
             onClick={handleProceedToAnalyze}
-            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] text-white px-6 py-3 min-w-[200px]"
+            className="font-semibold rounded-lg shadow-md transition duration-300 hover:bg-[#899481] px-6 py-3 min-w-[200px]"
           >
             Analyze
           </button>
