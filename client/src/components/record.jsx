@@ -15,6 +15,7 @@ const Record = () => {
   const [analysisResult, setAnalysisResult] = useState('');
   const [analysisError, setAnalysisError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisScore, setAnalysisScore] = useState('');
 
   const { referenceWaveform } = AudioProcessor();
 
@@ -116,6 +117,7 @@ const Record = () => {
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     setAnalysisResult('');
+    setAnalysisScore('');
     setAnalysisError('');
     
     try {
@@ -124,7 +126,10 @@ const Record = () => {
         setAnalysisError(response.data.error);
         setAnalysisResult('');
       } else {
+        //const {result, score} = response.data;
+        //console.log("Raw result:", response.data.result);
         setAnalysisResult(response.data.result);
+        setAnalysisScore(response.data.score);
         setAnalysisError('');
       }
     } catch (err) {
@@ -135,6 +140,8 @@ const Record = () => {
   };
 
   const splitAnalysisResult = (result) => {
+    //if (typeof result !== 'string') return <p>Invalid result format</p>;
+
     const splitSentences = result.split(';').map((sentence, index) => {
       if (index % 3 === 2) {
         return (
@@ -210,7 +217,7 @@ const Record = () => {
         
         {(analysisResult || analysisError) && (
         <div className="mt-8 p-6 rounded-lg shadow-md w-full max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold mb-4 text-center">Analysis Results</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">Analysis Results: {analysisScore}</h2>
           {analysisResult && splitAnalysisResult(analysisResult)}
           {analysisError && <p className="text-left text-red-500">{analysisError}</p>}
         </div>
