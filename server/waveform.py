@@ -52,6 +52,9 @@ def generate_waveform(audio_file):
     # plt.grid()
     # plt.show()
 
+    duration = librosa.get_duration(y=y, sr=sr)
+    print(f"Audio duration: {duration} seconds")
+
     times = [round(t, 1) if isinstance(t, float) else float(t) for t in times]
 
     response_data = {

@@ -17,14 +17,17 @@ def download_youtube_audio(youtube_url, output_mp3="output.mp3"):
 
     ydl_opts = {
         'format': 'bestaudio/best',
+        'noplaylist': True,  # Ensure only the video/clip itself is downloaded
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
-            'preferredquality': '192',
+            'preferredquality': '192'
         }],
-        'outtmpl': 'downloaded_audio.%(ext)s',  # Temporary file name
-        'ffmpeg_location': FFMPEG_PATH  # Set the correct FFmpeg path
+        'postprocessor_args': ['-ss', "00:00:00"], 
+        'outtmpl': 'downloaded_audio.%(ext)s',
+        'ffmpeg_location': FFMPEG_PATH
     }
+
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([youtube_url])  # Download video/audio
@@ -46,3 +49,4 @@ def download_youtube_audio(youtube_url, output_mp3="output.mp3"):
 # youtube_link = "https://youtube.com/clip/UgkxQGPOYrsPQ8PrsAx9mYhpfDGm3GiYhVxi?si=KRC8xS83fLtrc2Qm"
 # mp3_file = "my_audio.mp3"
 # download_youtube_audio(youtube_link, mp3_file)
+
