@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AudioProcessor from "./audioprocessor"; // Import Audio Processor
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Record = () => {
@@ -8,6 +10,8 @@ const Record = () => {
   const [processedData, setProcessedData] = useState(null);  // To store processed data for graph rendering
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  const { referenceWaveform } = AudioProcessor(); // Get YouTube waveform
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -73,6 +77,18 @@ const Record = () => {
     }));
   };
 
+  const handleProceedToAnalyze = () => {
+
+    console.log("User waveform:", userWaveform);
+    console.log("Reference waveform:", referenceWaveform);
+    
+    if (waveformData && referenceWaveform) {
+      navigate("/analyze", { state: { userWaveform: waveformData, referenceWaveform } });
+    } else {
+      alert("Please record your audio and load a reference first!");
+    }
+  };
+
   return (
     <div className="text-grey-900 h-screen w-full flex flex-col">
       {/* Display Waveform Graph Above the Record Button */}
@@ -113,13 +129,22 @@ const Record = () => {
       <div className="text-center flex flex-row items-center">
         <button
           onClick={isRecording ? stopRecording : startRecording}
-          className={` font-semibold rounded-lg shadow-md transition duration-300 ${isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+          className={`font-semibold rounded-lg shadow-md transition duration-300 ${isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
         >
           {isRecording ? 'Stop Recording' : 'Start Recording'}
         </button>
 
-      {/* Play Audio Button (Only appears after the audio URL is received) */}
-      {/* {processedData && (
+        {processedData && (
+          <button
+            onClick={handleProceedToAnalyze}
+            className="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 px-4 py-2"
+          >
+            Analyze
+          </button>
+        )}
+
+        {/* Play Audio Button (Only appears after the audio URL is received) */}
+        {/* {processedData && (
           <div className="mt-6 mb-10 box-shadow rounded-lg w-full max-w-5xl mx-auto flex flex-col items-center">
             <button
               onClick={toggleAudio}
@@ -134,7 +159,7 @@ const Record = () => {
             />
           </div>
         )}   */}
-    </div>
+      </div>
     </div>
   );
 };
