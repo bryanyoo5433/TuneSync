@@ -139,11 +139,11 @@ const Home = () => {
   return (
     <div className="text-grey-900 h-screen w-full flex flex-col">
       <header className="header">
-        <div className="text-2xl font-bold">TuneSync</div>
+        <div className="text-4xl font-bold">TuneSync</div>
       </header>
 
       <main className="flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-6">Convert Audio</h1>
+        <h1 className="text-2xl font-bold mb-6">Convert Audio</h1>
 
         <input
           type="text"
